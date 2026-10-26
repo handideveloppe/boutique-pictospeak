@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PictoSpeak - Application AAC & Communication Alternative</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PictoSpeak">
+    
+    <style>
+        :root { 
+            --primary: #2575fc;
+            --secondary: #6a11cb;
+            --dark: #2C3E50; 
+            --light: #F8F9FA;
+            --accent: #ff4757;
+            --success: #2ed573;
+            --bg: #F0F2F5; 
+            --violet: #9b59b6; 
+            --orange: #FF9800; 
+            --bleu: #2196F3; 
+            --vert: #4CAF50; 
+            --rouge: #ff4757; 
+            --jaune: #f1c40f; 
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--dark); line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; overflow: hidden; }
+
+        /* --- STYLES PAGE VITRINE --- */
+        #page-vitrine { background: #fff; color: var(--dark); position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; z-index: 1000; display: block; }
+        
+        header.vitrine-header { background: white; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .vitrine-logo { display: flex; align-items: center; gap: 12px; font-weight: 900; font-size: 1.4rem; color: var(--dark); text-decoration: none; }
+        .logo-pictospeak-ico { width: 40px; height: 40px; background: linear-gradient(135deg, var(--secondary), var(--primary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: bold; }
+
+        .hero { background: linear-gradient(180deg, #ffffff 0%, var(--light) 100%); color: var(--dark); padding: 60px 20px 40px; text-align: center; }
+        .hero h1 { font-size: 2.8rem; margin-bottom: 15px; font-weight: 800; color: var(--dark); }
+        .hero p { font-size: 1.2rem; max-width: 700px; margin: 0 auto 30px; color: #666; }
+
+        .section-v { padding: 50px 5%; max-width: 1100px; margin: 0 auto; }
+        .section-title { text-align: center; font-size: 2.2rem; margin-bottom: 40px; color: var(--dark); }
+        .section-title span { color: var(--primary); }
+
+        .grid-target { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .card-target { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--primary); }
+        .card-target h3 { margin-bottom: 15px; font-size: 1.3rem; }
+
+        .guide-container { display: flex; flex-direction: column; gap: 25px; margin-top: 20px; }
+        .guide-card { background: white; border-radius: 16px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: block; }
+        .guide-info h3 { font-size: 1.4rem; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .guide-info p { color: #555; margin-bottom: 15px; font-size: 0.95rem; }
+        .guide-steps { list-style: none; }
+        .guide-steps li { margin-bottom: 8px; padding-left: 20px; position: relative; font-size: 0.9rem; }
+        .guide-steps li::before { content: "✔"; position: absolute; left: 0; color: var(--success); font-weight: bold; }
+
+        .falc-box { background: #eef6ff; border-left: 6px solid var(--primary); padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
+        .falc-txt { font-size: 1.1rem; font-weight: bold; color: var(--dark); }
+        .btn-falc-audio { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 1rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 117, 252, 0.3); }
+
+        .stock-banner { padding: 15px; border-radius: 12px; margin-bottom: 20px; border-left: 6px solid; transition: all 0.3s ease; }
+        .stock-dispo { background-color: #e6f4ea; border-color: var(--vert); color: #137333; }
+        .stock-rupture { background-color: #fce8e6; border-color: var(--rouge); color: #c5221f; }
+        .stock-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .stock-title { font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+
+        .order-box { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); max-width: 800px; margin: 0 auto; border: 1px solid #E9ECEF; }
+        .order-tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #E9ECEF; padding-bottom: 10px; }
+        .order-tab-btn { flex: 1; padding: 12px; border: none; background: #F8F9FA; font-weight: bold; font-size: 1rem; border-radius: 10px; cursor: pointer; color: #6c757d; transition: all 0.2s; text-align: center; }
+        .order-tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(37, 117, 252, 0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
+        .badge-pending { background: #fff3cd; color: #856404; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-danger { background: #f8d7da; color: #721c24; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--dark); font-size: 0.95rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 1px solid #ccc; border-radius: 10px; font-size: 1rem; font-family: inherit; }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .btn-submit-suggestion { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--secondary), var(--primary)); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 117, 252, 0.3); }
+
+        footer.vitrine-footer { text-align: center; padding: 30px; background: var(--dark); color: white; margin-top: 60px; font-size: 0.9rem; }
+
+        /* --- STYLES APPLICATION PICTOSPEAK --- */
+        #app-vokalys { display: flex; flex-direction: column; width: 100vw; height: 100vh; background: var(--bg); position: relative; }
+        
+        .app-header { background: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; height: 60px; }
+        .sentence-bar { flex: 1; background: #edf2f7; margin: 0 15px; padding: 8px 12px; border-radius: 10px; min-height: 42px; display: flex; align-items: center; gap: 8px; overflow-x: auto; border: 1px solid #cbd5e1; }
+        .sentence-item { background: white; padding: 4px 10px; border-radius: 6px; font-weight: bold; border: 1px solid #cbd5e1; display: flex; align-items: center; gap: 5px; font-size: 0.9rem; white-space: nowrap; }
+        
+        .app-controls { display: flex; gap: 8px; }
+        .btn-app-ctrl { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-app-ctrl.btn-speak { background: var(--success); }
+        .btn-app-ctrl.btn-delete { background: var(--rouge); }
+
+        .app-body { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
+        .chapters-nav { display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .chapter-btn { padding: 10px 18px; border: none; background: white; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; border-left: 4px solid var(--primary); }
+        .chapter-btn.active { background: var(--primary); color: white; }
+
+        .grid-piktos { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; flex: 1; align-content: start; }
+        .pikto-card { background: white; border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.06); border: 2px solid transparent; transition: transform 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; }
+        .pikto-card:hover { transform: translateY(-2px); border-color: var(--primary); }
+        .pikto-emoji { font-size: 2.5rem; margin-bottom: 8px; }
+        .pikto-label { font-weight: bold; font-size: 0.95rem; color: var(--dark); }
+
+        .emergency-footer-bar { padding: 10px 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; }
+        .btn-emergency { background: var(--rouge); color: white; border: none; padding: 12px 25px; border-radius: 12px; font-weight: bold; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4); animation: pulse-emergency 2s infinite; }
+        @keyframes pulse-emergency { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
+        #flash-screen { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--rouge); z-index: 99999; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: bold; flex-direction: column; text-align: center; cursor: pointer; }
+
+        #modal-settings { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 30000; align-items: center; justify-content: center; }
+        .settings-box { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+
+        #custom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 20000; align-items: center; justify-content: center; }
+        .modal-box { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; }
+    </style>
+</head>
+<body onload="initVitrine()">
+
+    <div id="flash-screen" onclick="arreterUrgence()">
+        🚨 APPEL URGENCE 🚨
+        <div style="font-size: 1.2rem; margin-top: 20px; font-weight: normal; background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 10px;">Touchez l'écran pour arrêter l'alerte</div>
+    </div>
+
+    <div id="page-vitrine">
+        <header class="vitrine-header">
+            <a href="#" class="vitrine-logo">
+                <div class="logo-pictospeak-ico">P</div>
+                <span>PICTOSPEAK</span>
+            </a>
+        </header>
+
+        <section class="hero">
+            <h1>Donner une voix à ceux qui en ont besoin</h1>
+            <p>PictoSpeak est une application de Communication Alternative et Augmentative (CAA) intuitive, conçue pour faciliter le quotidien des enfants, adolescents et adultes ayant des difficultés de parole.</p>
+        </section>
+
+        <section class="section-v">
+            <h2 class="section-title">À qui s'adresse <span>PictoSpeak</span> ?</h2>
+            <div class="grid-target">
+                <div class="card-target">
+                    <h3>👦 Enfants</h3>
+                    <p>Adapté aux enfants présentant un retard de langage, des troubles du spectre de l'autisme (TSA) ou des difficultés d'apprentissage de la parole.</p>
+                </div>
+                <div class="card-target">
+                    <h3>🧑‍🦱 Adolescents</h3>
+                    <p>Un vocabulaire et une ergonomie pensés pour l'autonomie au collège, au lycée ou lors des activités quotidiennes.</p>
+                </div>
+                <div class="card-target">
+                    <h3>🧔 Adultes & Hospitalisation</h3>
+                    <p>Pour les personnes en situation de handicap, victimes d'AVC ou nécessitant un outil d'expression simple et rapide.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-v">
+            <h2 class="section-title">Guide complet & <span>Notice Visuelle</span></h2>
+
+            <div class="falc-box">
+                <div class="falc-txt">
+                    📖 <b>Notice Facile à Lire :</b> Appuyez sur le bouton pour écouter la notice.
+                </div>
+                <button class="btn-falc-audio" onclick="lireNoticeAudio()">
+                    🔊 Écouter les consignes
+                </button>
+            </div>
+
+            <div class="guide-container">
+                <div class="guide-card">
+                    <div class="guide-info">
+                        <h3>🗣 1. Exprimer un besoin & Vocaliser</h3>
+                        <p>L'interface principale permet de composer des phrases en touchant les pictogrammes.</p>
+                        <ul class="guide-steps">
+                            <li>Cliquez sur un pictogramme pour l'ajouter à la barre de phrase.</li>
+                            <li>Appuyez sur le haut-parleur pour écouter la synthèse vocale.</li>
+                            <li>Navigation rapide à travers les chapitres prédéfinis.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-info">
+                        <h3>📸 2. Personnaliser pictogrammes & photos</h3>
+                        <p>Ajoutez des éléments de la vie quotidienne de l'utilisateur.</p>
+                        <ul class="guide-steps">
+                            <li>Importez une photo personnelle depuis la tablette ou la caméra.</li>
+                            <li>Associez un texte spécifique au nouveau pictogramme.</li>
+                            <li>Organisez les éléments dans le chapitre de votre choix.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="guide-info">
+                        <h3>📦 3. Sauvegarde & Clé USB</h3>
+                        <p>Sécurisez la configuration de l'application et conservez une sauvegarde sur clé USB.</p>
+                        <ul class="guide-steps">
+                            <li><b>Export :</b> Sauvegardez l'ensemble du profil sur une clé USB ou la tablette.</li>
+                            <li><b>Import :</b> Restaurez la configuration facilement depuis un fichier HTML/JSON.</li>
+                            <li>Utilisable 100% hors-ligne une fois sauvegardé.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-v">
+            <h2 class="section-title">Clé USB & <span>Suivi de commande</span></h2>
+            <div class="order-box">
+                <div class="order-tabs">
+                    <button class="order-tab-btn active" onclick="switchOrderTab('tab-reserver')">📝 Réserver une Clé USB (10 €)</button>
+                    <button class="order-tab-btn" onclick="switchOrderTab('tab-suivi')">🔍 Suivre ma commande</button>
+                </div>
+
+                <div id="tab-reserver" class="tab-content active">
+                    <div id="bandeau-stock" class="stock-banner stock-dispo">
+                        <div class="stock-header">
+                            <span class="stock-title" id="stock-titre">🔌 Clés USB préchargées disponibles</span>
+                            <span class="status-badge" id="stock-badge">Stock : <b id="stock-compteur">0</b> disponible(s)</span>
+                        </div>
+                        <p id="stock-desc" style="margin-top: 8px; font-size: 0.95rem;">
+                            Réservez votre <strong>Clé USB Dual Type-C & USB</strong> avec l'application préinstallée et sa notice PDF. Aucun paiement n'est requis immédiatement.
+                        </p>
+                    </div>
+
+                    <div style="background: #f8f9fa; border: 1px dashed #cbd5e1; padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <span style="font-size: 0.9rem; font-weight: bold; color: var(--dark);">⚙ Ajuster le stock en direct :</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button type="button" onclick="modifierStock(getStock() - 1)" style="background: var(--dark); color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-weight: bold; cursor: pointer;">-</button>
+                            <input type="number" id="input-stock-vitrine" min="0" value="0" onchange="modifierStock(this.value)" style="width: 60px; text-align: center; padding: 6px; border: 1px solid #ccc; border-radius: 6px; font-weight: bold;">
+                            <button type="button" onclick="modifierStock(getStock() + 1)" style="background: var(--dark); color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-weight: bold; cursor: pointer;">+</button>
+                            <button type="button" onclick="modifierStock(0)" style="background: var(--rouge); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; cursor: pointer;">Rupture (0)</button>
+                        </div>
+                    </div>
+
+                    <form onsubmit="traiterReservation(event)">
+                        <div class="form-group">
+                            <label for="res-nom">Nom complet :</label>
+                            <input type="text" id="res-nom" placeholder="Ex: Jean Dupont" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="res-email">Adresse e-mail :</label>
+                            <input type="email" id="res-email" placeholder="jean.dupont@exemple.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="res-adresse">Adresse d'expédition (Optionnel) :</label>
+                            <input type="text" id="res-adresse" placeholder="123 Rue de la Paix, 75000 Paris">
+                        </div>
+                        <div class="form-group">
+                            <label for="res-note">Précisions ou besoins particuliers :</label>
+                            <textarea id="res-note" placeholder="Ex: Utilisation en établissement spécialisé, quantité souhaitée..."></textarea>
+                        </div>
+                        <button type="submit" class="btn-submit-suggestion" id="btn-submit-res">📋 Valider ma réservation</button>
+                    </form>
+                </div>
+
+                <div id="tab-suivi" class="tab-content">
+                    <p style="color: #555; margin-bottom: 20px;">
+                        Entrez votre numéro de référence (ex: <code>PICTO-2026-X892</code>) ou votre adresse e-mail pour vérifier le statut de votre réservation.
+                    </p>
+                    <form onsubmit="rechercherSuivi(event)">
+                        <div class="form-group">
+                            <label for="suivi-ref">Référence de réservation ou E-mail :</label>
+                            <input type="text" id="suivi-ref" placeholder="Ex: PICTO-2026-XXXX ou votre email" required>
+                        </div>
+                        <button type="submit" class="btn-submit-suggestion" style="background: var(--dark);">🔍 Vérifier le statut</button>
+                    </form>
+
+                    <div id="resultat-suivi" style="display:none; margin-top: 25px; padding: 20px; border-radius: 12px; background: #f8f9fa; border: 1px solid #dee2e6;"></div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="vitrine-footer">
+            <p>PictoSpeak — Projet de communication alternative et augmentative (CAA) | Contact : handideveloppe@proton.me</p>
+        </footer>
+    </div>
+
+    <div id="app-vokalys">
+        <header class="app-header">
+            <button class="btn-app-ctrl" onclick="retourVitrine()" title="Retour Vitrine">🏠</button>
+            <div class="sentence-bar" id="sentence-bar">
+                <span style="color: #a0aec0; font-size: 0.9rem; font-style: italic;">Touchez les pictogrammes...</span>
+            </div>
+            <div class="app-controls">
+                <button class="btn-app-ctrl btn-speak" onclick="lirePhrase()" title="Écouter">🔊</button>
+                <button class="btn-app-ctrl btn-delete" onclick="effacerDernierMot()" title="Effacer">⌫</button>
+                <button class="btn-app-ctrl" onclick="ouvrirReglages()" title="Réglages & Contact">⚙️</button>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <div class="chapters-nav" id="chapters-nav"></div>
+            <div class="grid-piktos" id="grid-piktos"></div>
+        </div>
+
+        <div class="emergency-footer-bar">
+            <button class="btn-emergency" onclick="declencherUrgence()">
+                🚨 APPEL URGENCE
+            </button>
+        </div>
+    </div>
+
+    <div id="modal-settings">
+        <div class="settings-box">
+            <div class="settings-header">
+                <h3 style="color: var(--primary);">⚙️ Réglages & Suggestions PictoSpeak</h3>
+                <button onclick="fermerReglages()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; font-weight: bold;">&times;</button>
+            </div>
+            <p style="color: #555; margin-bottom: 20px; font-size: 0.95rem;">
+                Une idée pour améliorer PictoSpeak ? Un bug à signaler ? Envoyez-nous vos propositions directement depuis l'application.
+            </p>
+            <form id="form-suggestions" onsubmit="envoyerSuggestion(event)">
+                <div class="form-group">
+                    <label for="sugg-nom">Votre Nom ou Établissement :</label>
+                    <input type="text" id="sugg-nom" placeholder="Ex: Marie Dupont / IME Les Pins" required>
+                </div>
+                <div class="form-group">
+                    <label for="sugg-email">Votre Email :</label>
+                    <input type="email" id="sugg-email" placeholder="votre.email@exemple.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="sugg-type">Type de retour :</label>
+                    <select id="sugg-type">
+                        <option value="Amélioration">💡 Suggestion d'amélioration</option>
+                        <option value="Bug">🐛 Signalement de problème</option>
+                        <option value="Question">❓ Question générale</option>
+                        <option value="Autre">💬 Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sugg-message">Votre message / suggestion :</label>
+                    <textarea id="sugg-message" placeholder="Décrivez votre idée ou remarque ici..." required></textarea>
+                </div>
+                <button type="submit" class="btn-submit-suggestion">✉️ Envoyer ma suggestion</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="custom-modal">
+        <div class="modal-box">
+            <h3 id="modal-title">Information</h3>
+            <div id="modal-fields"></div>
+            <button onclick="document.getElementById('custom-modal').style.display='none'" style="margin-top:15px; padding:10px 20px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        const donneesVokalys = {
+            "IDENTITE DU L'UTILISATEUR": [
+                { emoji: "👦", texte: "Moi / Je" },
+                { emoji: "👧", texte: "Fille" },
+                { emoji: "👨", texte: "Homme" },
+                { emoji: "👩", texte: "Femme" }
+            ],
+            "FAMILLE & PERSONELS": [
+                { emoji: "👩", texte: "Maman" },
+                { emoji: "👨", texte: "Papa" },
+                { emoji: "👩‍⚕", texte: "Infirmière" },
+                { emoji: "👨‍⚕️", texte: "Docteur" },
+                { emoji: "🤝", texte: "Aidant" }
+            ],
+            "BESOINS IMMEDIATS": [
+                { emoji: "💧", texte: "Eau" },
+                { emoji: "🍎", texte: "Manger" },
+                { emoji: "🚽", texte: "Toilettes" },
+                { emoji: "🛏️", texte: "Dormir" },
+                { emoji: "🌡", texte: "J'ai chaud / froid" }
+            ],
+            "EMOTIONS & ETAT": [
+                { emoji: "😊", texte: "Bien" },
+                { emoji: "😢", texte: "Triste" },
+                { emoji: "😡", texte: "Énervé" },
+                { emoji: "🤕", texte: "Mal" },
+                { emoji: "😴", texte: "Fatigué" }
+            ],
+            "ACTIONS & DEMANDE": [
+                { emoji: "✋", texte: "Arrêt" },
+                { emoji: "➕", texte: "Encore" },
+                { emoji: "❓", texte: "Pourquoi" },
+                { emoji: "👍", texte: "Oui" },
+                { emoji: "👎", texte: "Non" }
+            ],
+            "LIEUX & SORTIES": [
+                { emoji: "🏠", texte: "Maison" },
+                { emoji: "🏥", texte: "Hôpital" },
+                { emoji: "🌳", texte: "Dehors" },
+                { emoji: "🚗", texte: "Voiture" }
+            ]
+        };
+
+        let chapitreActif = "IDENTITE DU L'UTILISATEUR";
+        let phraseCourante = [];
+
+        function initVitrine() {
+            updateStockDisplay();
+            chargerChapitres();
+            chargerPiktos(chapitreActif);
+        }
+
+        function retourVitrine() {
+            document.getElementById('page-vitrine').style.display = 'block';
+        }
+
+        function ouvrirReglages() {
+            document.getElementById('modal-settings').style.display = 'flex';
+        }
+
+        function fermerReglages() {
+            document.getElementById('modal-settings').style.display = 'none';
+        }
+
+        function chargerChapitres() {
+            let container = document.getElementById('chapters-nav');
+            container.innerHTML = "";
+            Object.keys(donneesVokalys).forEach(chapitre => {
+                let btn = document.createElement('button');
+                btn.className = `chapter-btn ${chapitre === chapitreActif ? 'active' : ''}`;
+                btn.innerText = chapitre;
+                btn.onclick = () => {
+                    chapitreActif = chapitre;
+                    chargerChapitres();
+                    chargerPiktos(chapitre);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function chargerPiktos(chapitre) {
+            let container = document.getElementById('grid-piktos');
+            container.innerHTML = "";
+            let piktos = donneesVokalys[chapitre] || [];
+            piktos.forEach(item => {
+                let card = document.createElement('div');
+                card.className = 'pikto-card';
+                card.innerHTML = `
+                    <div class="pikto-emoji">${item.emoji}</div>
+                    <div class="pikto-label">${item.texte}</div>
+                `;
+                card.onclick = () => ajouterAuMotier(item.texte);
+                container.appendChild(card);
+            });
+        }
+
+        function ajouterAuMotier(texte) {
+            phraseCourante.push(texte);
+            mettreAJourBarrePhrase();
+            jouerSonMot(texte);
+        }
+
+        function effacerDernierMot() {
+            phraseCourante.pop();
+            mettreAJourBarrePhrase();
+        }
+
+        function mettreAJourBarrePhrase() {
+            let bar = document.getElementById('sentence-bar');
+            if (phraseCourante.length === 0) {
+                bar.innerHTML = `<span style="color: #a0aec0; font-size: 0.9rem; font-style: italic;">Touchez les pictogrammes...</span>`;
+                return;
+            }
+            bar.innerHTML = "";
+            phraseCourante.forEach(mot => {
+                let span = document.createElement('div');
+                span.className = 'sentence-item';
+                span.innerText = mot;
+                bar.appendChild(span);
+            });
+        }
+
+        function jouerSonMot(texte) {
+            if ('speechSynthesis' in window) {
+                let utterance = new SpeechSynthesisUtterance(texte);
+                utterance.lang = 'fr-FR';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function lirePhrase() {
+            if (phraseCourante.length === 0) return;
+            let phrase = phraseCourante.join(" ");
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let utterance = new SpeechSynthesisUtterance(phrase);
+                utterance.lang = 'fr-FR';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function declencherUrgence() {
+            document.getElementById('flash-screen').style.display = 'flex';
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let m = new SpeechSynthesisUtterance("Au secours ! Appel d'urgence demandé !");
+                m.lang = 'fr-FR';
+                window.speechSynthesis.speak(m);
+            }
+        }
+
+        function arreterUrgence() {
+            document.getElementById('flash-screen').style.display = 'none';
+        }
+
+        function getStock() {
+            let s = localStorage.getItem('pictospeak_stock_usb');
+            return s !== null ? parseInt(s, 10) : 0;
+        }
+
+        function updateStockDisplay() {
+            let stock = getStock();
+            let banner = document.getElementById('bandeau-stock');
+            let titre = document.getElementById('stock-titre');
+            let badge = document.getElementById('stock-badge');
+            let desc = document.getElementById('stock-desc');
+            let btnSubmit = document.getElementById('btn-submit-res');
+            let inputVitrine = document.getElementById('input-stock-vitrine');
+
+            if (inputVitrine) inputVitrine.value = stock;
+
+            if (stock > 0) {
+                if (banner) {
+                    banner.className = "stock-banner stock-dispo";
+                    titre.innerHTML = "🔌 Clés USB préchargées disponibles";
+                    badge.className = "status-badge badge-success";
+                    badge.innerHTML = `Stock : <b>${stock}</b> disponible(s)`;
+                    desc.innerHTML = `Réservez votre <strong>Clé USB Dual Type-C & USB</strong> avec l'application préinstallée et sa notice PDF. Aucun paiement n'est requis immédiatement.`;
+                }
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.style.opacity = "1";
+                    btnSubmit.innerHTML = "📋 Valider ma réservation";
+                }
+            } else {
+                if (banner) {
+                    banner.className = "stock-banner stock-rupture";
+                    titre.innerHTML = "⚠️ Rupture de stock — Clés USB temporairement indisponibles";
+                    badge.className = "status-badge badge-danger";
+                    badge.innerHTML = "Rupture de stock (0 disponible)";
+                    desc.innerHTML = `Toutes nos clés USB ont été réservées. Vous pouvez toujours effectuer une pré-réservation pour figurer sur la liste d'attente prioritaire lors du prochain réapprovisionnement.`;
+                }
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.style.opacity = "1";
+                    btnSubmit.innerHTML = "⏳ Réserver sur liste d'attente";
+                }
+            }
+        }
+
+        function modifierStock(valeur) {
+            let stock = Math.max(0, parseInt(valeur, 10) || 0);
+            localStorage.setItem('pictospeak_stock_usb', stock);
+            updateStockDisplay();
+        }
+
+        function switchOrderTab(tabId) {
+            document.querySelectorAll('.order-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function traiterReservation(e) {
+            e.preventDefault();
+            let stockActuel = getStock();
+
+            let nom = document.getElementById('res-nom').value;
+            let email = document.getElementById('res-email').value;
+            let adresse = document.getElementById('res-adresse').value;
+            let note = document.getElementById('res-note').value;
+
+            let ref = "PICTO-2026-" + Math.random().toString(36).substring(2, 6).toUpperCase();
+            let statutRes = stockActuel > 0 ? "Réservation confirmée — En préparation" : "Liste d'attente — En attente du réapprovisionnement";
+
+            let reservations = JSON.parse(localStorage.getItem('pictospeak_reservations') || '[]');
+            reservations.push({
+                ref: ref, nom: nom, email: email, adresse: adresse, note: note,
+                date: new Date().toLocaleDateString('fr-FR'), statut: statutRes
+            });
+            localStorage.setItem('pictospeak_reservations', JSON.stringify(reservations));
+
+            if (stockActuel > 0) modifierStock(stockActuel - 1);
+
+            let sujet = `[RÉSERVATION CLÉ USB] ${ref} - ${nom}`;
+            let corps = `Bonjour PictoSpeak,\n\nJe souhaite réserver une Clé USB Dual Type-C au tarif de 10 €.\n\nRéférence : ${ref}\nNom : ${nom}\nEmail : ${email}\nAdresse : ${adresse || 'Non renseignée'}\nNotes : ${note || 'Aucune'}\n\nMerci !`;
+            
+            alert(`✅ Réservation enregistrée !\n\nVotre référence est : ${ref}\nStatut : ${statutRes}`);
+            window.location.href = `mailto:handideveloppe@proton.me?subject=${encodeURIComponent(sujet)}&body=${encodeURIComponent(corps)}`;
+
+            document.getElementById('suivi-ref').value = ref;
+            switchOrderTab('tab-suivi');
+            rechercherSuiviDirect(ref);
+        }
+
+        function rechercherSuivi(e) {
+            e.preventDefault();
+            rechercherSuiviDirect(document.getElementById('suivi-ref').value.trim());
+        }
+
+        function rechercherSuiviDirect(query) {
+            let container = document.getElementById('resultat-suivi');
+            container.style.display = 'block';
+
+            let reservations = JSON.parse(localStorage.getItem('pictospeak_reservations') || '[]');
+            let trouve = reservations.find(r => r.ref.toLowerCase() === query.toLowerCase() || r.email.toLowerCase() === query.toLowerCase());
+
+            if (trouve) {
+                let badgeClass = trouve.statut.includes("confirmée") ? "badge-success" : "badge-pending";
+                container.innerHTML = `
+                    <h3 style="color:var(--primary); margin-bottom:10px;">Réservation ${trouve.ref}</h3>
+                    <p><strong>Nom :</strong> ${trouve.nom}</p>
+                    <p><strong>E-mail :</strong> ${trouve.email}</p>
+                    <p><strong>Date :</strong> ${trouve.date}</p>
+                    <p><strong>Statut :</strong> <span class="status-badge ${badgeClass}">${trouve.statut}</span></p>
+                `;
+            } else {
+                container.innerHTML = `<p style="color:#6c757d;">Aucune réservation trouvée pour "${query}". Contactez handideveloppe@proton.me en cas de besoin.</p>`;
+            }
+        }
+
+        function lireNoticeAudio() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let m = new SpeechSynthesisUtterance("Bienvenue dans PictoSpeak. Pour utiliser l'application, touchez les pictogrammes pour composer une phrase, puis appuyez sur le haut-parleur.");
+                m.lang = 'fr-FR';
+                window.speechSynthesis.speak(m);
+            }
+        }
+
+        function envoyerSuggestion(e) {
+            e.preventDefault();
+            let nom = document.getElementById('sugg-nom').value;
+            let email = document.getElementById('sugg-email').value;
+            let type = document.getElementById('sugg-type').value;
+            let msg = document.getElementById('sugg-message').value;
+
+            window.location.href = `mailto:handideveloppe@proton.me?subject=${encodeURIComponent("[" + type + "] Suggestion PictoSpeak de " + nom)}&body=${encodeURIComponent("Nom: " + nom + "\nEmail: " + email + "\n\nMessage:\n" + msg)}`;
+            alert(`Merci ${nom} ! Votre message va être envoyé à handideveloppe@proton.me.`);
+            document.getElementById('form-suggestions').reset();
+            fermerReglages();
+        }
+    </script>
+</body>
+</html>
